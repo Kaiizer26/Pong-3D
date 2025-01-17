@@ -66,8 +66,6 @@ function createRenderer() {
 function createCameras() {
   const aspectRatio = (window.innerWidth ) / window.innerHeight;
 
-  // Caméra pour la raquette humaine
-
   // Caméra pour la raquette CPU
   cpuCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
   cpuCamera.position.set(0, 30, -50); // Positionnez la caméra du CPU plus loin de l'axe Z
