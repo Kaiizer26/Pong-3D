@@ -67,9 +67,6 @@ function createCameras() {
   const aspectRatio = (window.innerWidth ) / window.innerHeight;
 
   // Caméra pour la raquette humaine
-  humanCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
-  humanCamera.position.set(0, 50, -35); // Positionnez la caméra plus proche de l'axe Z
-  humanCamera.lookAt(0, 0, 0);
 
   // Caméra pour la raquette CPU
   cpuCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
@@ -259,12 +256,7 @@ function animate() {
     cpu.position.x = Math.min(cpu.position.x + 0.75, 20);
   }
 
-  // Mettre à jour les caméras pour qu'elles suivent les raquettes
-  humanCamera.position.x = human.position.x;
-  humanCamera.position.z = human.position.z - 20;
-  humanCamera.position.y = 15;
-  humanCamera.lookAt(human.position.x, 0, 0);
-
+  
   cpuCamera.position.x = cpu.position.x;
   cpuCamera.position.z = cpu.position.z - 20;
   cpuCamera.position.y = 15;
@@ -289,9 +281,8 @@ window.addEventListener("resize", () => {
   renderer1.setSize(window.innerWidth, window.innerHeight);
 
   const aspectRatio = (window.innerWidth) / window.innerHeight;
-  humanCamera.aspect = aspectRatio;
   cpuCamera.aspect = aspectRatio;
-  humanCamera.updateProjectionMatrix();
+
   cpuCamera.updateProjectionMatrix();
 });
 
