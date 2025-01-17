@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-let renderer1, renderer2, humanCamera, cpuCamera, scene;
+let renderer1, humanCamera, cpuCamera, scene;
 let puck, human, cpu;
 const walls = [];
 let puckSpeed = 0.5;
@@ -53,23 +53,18 @@ function createScene() {
   scene = new THREE.Scene();
 }
 
-function createRenderers() {
+function createRenderer() {
   // Créez deux rendus séparés, chacun pour une caméra différente
   renderer1 = new THREE.WebGLRenderer({ antialias: true });
-  renderer1.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer1.setSize(window.innerWidth, window.innerHeight);
   renderer1.setClearColor(0x99e0ff);
   renderer1.shadowMap.enabled = true;
   document.body.appendChild(renderer1.domElement);
 
-  renderer2 = new THREE.WebGLRenderer({ antialias: true });
-  renderer2.setSize(window.innerWidth / 2, window.innerHeight);
-  renderer2.setClearColor(0x99e0ff);
-  renderer2.shadowMap.enabled = true;
-  document.body.appendChild(renderer2.domElement);
 }
 
 function createCameras() {
-  const aspectRatio = (window.innerWidth / 2) / window.innerHeight;
+  const aspectRatio = (window.innerWidth ) / window.innerHeight;
 
   // Caméra pour la raquette humaine
   humanCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
@@ -250,17 +245,17 @@ function animate() {
     handleCollisions();
   }
 
-  if (keyState["q"]) {
-    human.position.x = Math.max(human.position.x - 0.5, -20);
+  if (keyState["p"]) {
+    human.position.x = Math.max(human.position.x - 0.75, -20);
   }
-  if (keyState["s"]) {
-    human.position.x = Math.min(human.position.x + 0.5, 20);
+  if (keyState["o"]) {
+    human.position.x = Math.min(human.position.x + 0.75, 20);
   }
-  if (keyState["m"]) {
-    cpu.position.x = Math.max(cpu.position.x - 0.5, -20);
+  if (keyState["z"]) {
+    cpu.position.x = Math.max(cpu.position.x - 0.75, -20);
   }
-  if (keyState["l"]) {
-    cpu.position.x = Math.min(cpu.position.x + 0.5, 20);
+  if (keyState["a"]) {
+    cpu.position.x = Math.min(cpu.position.x + 0.75, 20);
   }
 
   // Mettre à jour les caméras pour qu'elles suivent les raquettes
@@ -277,8 +272,6 @@ function animate() {
   // Rendu pour le joueur humain
   renderer1.render(scene, humanCamera);
 
-  // Rendu pour le joueur CPU
-  renderer2.render(scene, cpuCamera);
 }
 
 // Gestion des événements clavier
@@ -292,10 +285,9 @@ document.addEventListener("keyup", (event) => {
 
 // Gérer le redimensionnement de la fenêtre
 window.addEventListener("resize", () => {
-  renderer1.setSize(window.innerWidth / 2, window.innerHeight);
-  renderer2.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer1.setSize(window.innerWidth, window.innerHeight);
 
-  const aspectRatio = (window.innerWidth / 2) / window.innerHeight;
+  const aspectRatio = (window.innerWidth) / window.innerHeight;
   humanCamera.aspect = aspectRatio;
   cpuCamera.aspect = aspectRatio;
   humanCamera.updateProjectionMatrix();
@@ -304,7 +296,7 @@ window.addEventListener("resize", () => {
 
 function init() {
   createScene();
-  createRenderers();
+  createRenderer();
   createCameras();
   createLight();
   createSurface();
