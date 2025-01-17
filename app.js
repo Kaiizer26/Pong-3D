@@ -1,13 +1,14 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-let renderer, humanCamera, cpuCamera, scene;
+let renderer1, renderer2, humanCamera, cpuCamera, scene;
 let puck, human, cpu;
 const walls = [];
-let puckSpeed = 0.5; 
+let puckSpeed = 0.5;
 let puckDirection = new THREE.Vector3(0.1, 0, puckSpeed);
 let humanScore = 0;
 let cpuScore = 0;
+let gameOver = false;
 
 // Ajouter un élément HTML pour afficher le score
 const scoreElement = document.createElement("div");
@@ -20,39 +21,70 @@ scoreElement.style.fontFamily = "Arial, sans-serif";
 scoreElement.innerHTML = `Human: 0 | CPU: 0`;
 document.body.appendChild(scoreElement);
 
-let keyState = {}; 
+// Ajouter un message de fin de partie
+const endMessageElement = document.createElement("div");
+endMessageElement.style.position = "absolute";
+endMessageElement.style.top = "50%";
+endMessageElement.style.left = "50%";
+endMessageElement.style.transform = "translate(-50%, -50%)";
+endMessageElement.style.color = "black";
+endMessageElement.style.fontSize = "30px";
+endMessageElement.style.fontFamily = "Arial, sans-serif";
+endMessageElement.style.visibility = "hidden"; // Caché au départ
+endMessageElement.style.textAlign = "center"; // Centrer le texte
+document.body.appendChild(endMessageElement);
+
+// Ajouter un bouton pour recommencer la partie
+const restartButton = document.createElement("button");
+restartButton.innerHTML = "Restart Game";
+restartButton.style.position = "absolute";
+restartButton.style.top = "60%";
+restartButton.style.left = "50%";
+restartButton.style.transform = "translateX(-50%)";
+restartButton.style.padding = "10px 20px";
+restartButton.style.fontSize = "20px";
+restartButton.style.visibility = "hidden"; // Caché au départ
+restartButton.addEventListener("click", restartGame);
+document.body.appendChild(restartButton);
+
+let keyState = {};
 
 function createScene() {
   scene = new THREE.Scene();
 }
 
-function createRenderer() {
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x99e0ff);
-  renderer.shadowMap.enabled = true; 
-  document.body.appendChild(renderer.domElement);
+function createRenderers() {
+  // Créez deux rendus séparés, chacun pour une caméra différente
+  renderer1 = new THREE.WebGLRenderer({ antialias: true });
+  renderer1.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer1.setClearColor(0x99e0ff);
+  renderer1.shadowMap.enabled = true;
+  document.body.appendChild(renderer1.domElement);
+
+  renderer2 = new THREE.WebGLRenderer({ antialias: true });
+  renderer2.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer2.setClearColor(0x99e0ff);
+  renderer2.shadowMap.enabled = true;
+  document.body.appendChild(renderer2.domElement);
 }
 
 function createCameras() {
-  const aspectRatio = window.innerWidth / 2 / window.innerHeight;
+  const aspectRatio = (window.innerWidth / 2) / window.innerHeight;
 
   // Caméra pour la raquette humaine
   humanCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
-  humanCamera.position.set(0, 15, 35); 
-  humanCamera.lookAt(0, 0, 0); 
+  humanCamera.position.set(0, 30, 50); // Positionnez la caméra plus proche de l'axe Z
+  humanCamera.lookAt(0, 0, 0);
 
   // Caméra pour la raquette CPU
   cpuCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
-  cpuCamera.position.set(0, 30, -50); // Position plus reculée
-  cpuCamera.lookAt(0, 0, 0); // Point de vue centré sur le terrain
+  cpuCamera.position.set(0, 30, -50); // Positionnez la caméra du CPU plus loin de l'axe Z
+  cpuCamera.lookAt(0, 0, 0);
 }
-
-
 
 function createLight() {
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(-20, 50, 0); 
+  directionalLight.position.set(-20, 50, 0);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 2048;
   directionalLight.shadow.mapSize.height = 2048;
@@ -109,7 +141,7 @@ function createPuck() {
       }
     });
 
-    gltf.scene.scale.set(60, 60, 60); 
+    gltf.scene.scale.set(60, 60, 60);
     gltf.scene.position.set(0, 1, 0);
     gltf.scene.rotation.set(5, 1, 0);
 
@@ -136,7 +168,7 @@ function createRackets() {
 
 function resetPuck(winner) {
   puck.position.set(0, 1, 0);
-  puckSpeed = 0.5; 
+  puckSpeed = 0.5;
   puckDirection.set(0.1, 0, winner === "human" ? puckSpeed : -puckSpeed);
   if (winner === "human") {
     humanScore++;
@@ -144,6 +176,13 @@ function resetPuck(winner) {
     cpuScore++;
   }
   scoreElement.innerHTML = `Human: ${humanScore} | CPU: ${cpuScore}`;
+
+  // Vérification du score pour la fin de la partie
+  if (humanScore === 3) {
+    endGame("Human");
+  } else if (cpuScore === 3) {
+    endGame("CPU");
+  }
 }
 
 function handleCollisions() {
@@ -157,9 +196,9 @@ function handleCollisions() {
     puck.position.x >= human.position.x - 6 &&
     puck.position.x <= human.position.x + 6
   ) {
-    puck.rotation.z= Math.PI;
+    puck.rotation.z += Math.PI;
     puckDirection.z = -Math.abs(puckDirection.z);
-    puckSpeed += 0.3; 
+    puckSpeed += 0.3;
     puckDirection.setLength(puckSpeed);
   }
   if (
@@ -168,9 +207,9 @@ function handleCollisions() {
     puck.position.x >= cpu.position.x - 6 &&
     puck.position.x <= cpu.position.x + 6
   ) {
-    puck.rotation.z= Math.PI;
+    puck.rotation.z += Math.PI;
     puckDirection.z = Math.abs(puckDirection.z);
-    puckSpeed += 0.3; 
+    puckSpeed += 0.3;
     puckDirection.setLength(puckSpeed);
   }
 
@@ -181,7 +220,29 @@ function handleCollisions() {
   }
 }
 
+function endGame(winner) {
+  gameOver = true;
+  endMessageElement.innerHTML = `${winner} wins!`;
+  endMessageElement.style.visibility = "visible"; // Afficher le message de fin
+  restartButton.style.visibility = "visible"; // Afficher le bouton pour recommencer
+  endMessageElement.style.color = "yellow"; // Afficher le bouton pour recommencer
+}
+
+function restartGame() {
+  humanScore = 0;
+  cpuScore = 0;
+  gameOver = false;
+  scoreElement.innerHTML = `Human: 0 | CPU: 0`;
+  endMessageElement.style.visibility = "hidden"; // Masquer le message de fin
+  restartButton.style.visibility = "hidden"; // Masquer le bouton de redémarrage
+  puck.position.set(0, 1, 0);
+  puckDirection.set(0.1, 0, puckSpeed);
+  animate();
+}
+
 function animate() {
+  if (gameOver) return; // Si la partie est terminée, ne plus animer
+
   requestAnimationFrame(animate);
 
   if (puck) {
@@ -203,25 +264,22 @@ function animate() {
   }
 
   // Mettre à jour les caméras pour qu'elles suivent les raquettes
-  humanCamera.position.x = human.position.x; // Aligner avec la raquette humaine
-  humanCamera.position.z = human.position.z + 20; // Distance optimale derrière la raquette
-  humanCamera.position.y = 10;
-  humanCamera.lookAt(human.position.x, 0, 0); // Fixer le regard vers le terrain
+  humanCamera.position.x = cpu.position.x;
+  humanCamera.position.z = cpu.position.z - 20;
+  humanCamera.position.y = 15;
+  humanCamera.lookAt(cpu.position.x, 0, 0);
 
-  cpuCamera.position.x = cpu.position.x; 
-  cpuCamera.position.z = cpu.position.z - 20; 
-  cpuCamera.position.y = 15; 
-  cpuCamera.lookAt(cpu.position.x, 0, 0); 
+  cpuCamera.position.x = cpu.position.x;
+  cpuCamera.position.z = cpu.position.z - 20;
+  cpuCamera.position.y = 15;
+  cpuCamera.lookAt(cpu.position.x, 0, 0);
 
-  // Diviser l'écran et rendre les deux caméras
-  renderer.setViewport(0, 0, window.innerWidth / 2, window.innerHeight);
-  renderer.render(scene, humanCamera);
+  // Rendu pour le joueur humain
+  renderer1.render(scene, humanCamera);
 
-  renderer.setViewport(window.innerWidth / 2, 0, window.innerWidth / 2, window.innerHeight);
-  renderer.render(scene, cpuCamera);
+  // Rendu pour le joueur CPU
+  renderer2.render(scene, cpuCamera);
 }
-
-
 
 // Gestion des événements clavier
 document.addEventListener("keydown", (event) => {
@@ -232,9 +290,21 @@ document.addEventListener("keyup", (event) => {
   keyState[event.key.toLowerCase()] = false;
 });
 
+// Gérer le redimensionnement de la fenêtre
+window.addEventListener("resize", () => {
+  renderer1.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer2.setSize(window.innerWidth / 2, window.innerHeight);
+
+  const aspectRatio = (window.innerWidth / 2) / window.innerHeight;
+  humanCamera.aspect = aspectRatio;
+  cpuCamera.aspect = aspectRatio;
+  humanCamera.updateProjectionMatrix();
+  cpuCamera.updateProjectionMatrix();
+});
+
 function init() {
   createScene();
-  createRenderer();
+  createRenderers();
   createCameras();
   createLight();
   createSurface();
