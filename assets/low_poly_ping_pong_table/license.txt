@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Ping Pong Table
+* source:	https://sketchfab.com/3d-models/low-poly-ping-pong-table-541b94352ae443be8e2bfb9de0e80865
+* author:	Digitalis Reality (https://sketchfab.com/digitalisreality)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Ping Pong Table" (https://sketchfab.com/3d-models/low-poly-ping-pong-table-541b94352ae443be8e2bfb9de0e80865) by Digitalis Reality (https://sketchfab.com/digitalisreality) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

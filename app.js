@@ -68,7 +68,7 @@ function createCameras() {
 
   // Caméra pour la raquette humaine
   humanCamera = new THREE.PerspectiveCamera(80, aspectRatio, 0.1, 1000);
-  humanCamera.position.set(0, 30, 50); // Positionnez la caméra plus proche de l'axe Z
+  humanCamera.position.set(0, 50, -35); // Positionnez la caméra plus proche de l'axe Z
   humanCamera.lookAt(0, 0, 0);
 
   // Caméra pour la raquette CPU
@@ -94,6 +94,7 @@ function createLight() {
 }
 
 function createSurface() {
+  
   const surfaceGeometry = new THREE.BoxGeometry(50, 1, 60);
   const surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0x64ff5c });
   const surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
@@ -103,7 +104,7 @@ function createSurface() {
 }
 
 function createWalls() {
-  const wallMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+  const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xe5e5e5 });
 
   const sideWallLeft = new THREE.Mesh(
     new THREE.BoxGeometry(1, 10, 60),
@@ -259,10 +260,10 @@ function animate() {
   }
 
   // Mettre à jour les caméras pour qu'elles suivent les raquettes
-  humanCamera.position.x = cpu.position.x;
-  humanCamera.position.z = cpu.position.z - 20;
+  humanCamera.position.x = human.position.x;
+  humanCamera.position.z = human.position.z - 20;
   humanCamera.position.y = 15;
-  humanCamera.lookAt(cpu.position.x, 0, 0);
+  humanCamera.lookAt(human.position.x, 0, 0);
 
   cpuCamera.position.x = cpu.position.x;
   cpuCamera.position.z = cpu.position.z - 20;
@@ -270,7 +271,7 @@ function animate() {
   cpuCamera.lookAt(cpu.position.x, 0, 0);
 
   // Rendu pour le joueur humain
-  renderer1.render(scene, humanCamera);
+  renderer1.render(scene, cpuCamera);
 
 }
 
