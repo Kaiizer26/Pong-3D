@@ -1,7 +1,4 @@
-# Three.js Pong
+# Three.js Pong en 3D
 
-I wanted to learn Three.js a bit, so I made a pong game. Enjoy!
+Pong en 3D avec Three.js
 
-## License
-
-MIT Licensed..
